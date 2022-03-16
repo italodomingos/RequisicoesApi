@@ -1,6 +1,6 @@
 import logging
-
 import requests
+from static.autenticacao import url_requisicao_bitrix
 
 data = {
     "filter": {
@@ -8,12 +8,12 @@ data = {
     },
     "select": ["ID"]
 }
-# request = requests.post("https://bambui.bitrix24.com.br/rest/57/twhlofvidecl4w63/crm.deal.list", headers=headers,
+# request = requests.post(f"{url_requisicao_bitrix}crm.deal.list", headers=headers,
 #                         data=data)
 
 while True:
     try:
-        request = requests.post("https://bambui.bitrix24.com.br/rest/57/twhlofvidecl4w63/crm.deal.list", json=data)
+        request = requests.post(f"{url_requisicao_bitrix}crm.deal.list", json=data)
         cards_funil_results = request.json()
         cards_funil = cards_funil_results['result']
         print(cards_funil_results)
@@ -24,7 +24,7 @@ while True:
 
                 "ID": card['ID']
             }
-            request = requests.post("https://bambui.bitrix24.com.br/rest/57/twhlofvidecl4w63/crm.deal.delete",
+            request = requests.post(f"{url_requisicao_bitrix}crm.deal.delete",
                                     json=delete_params)
 
             print(f"Card com o ID: {card['ID']} removido")

@@ -8,20 +8,19 @@ import time
 import base64
 from email import encoders
 import pandas as pd
-import openpyxl
+from static.autenticacao import token_uau, login_uau, senha_uau
+from static.autenticacao import login_email, senha_email
 
 
 def envia_email(destinatario, corpo, anexos_base64, nome, ano):
     host = 'smtp.office365.com'
     port = 587
-    user = 'no-reply@bambui.com.br'
-    password = 'noreplay@2018'
     email = smtplib.SMTP(host, port)
     email.starttls()
-    email.login(user, password)
+    email.login(login_email, senha_email)
 
     msg = MIMEMultipart()
-    msg['From'] = user
+    msg['From'] = login_email
     msg['Subject'] = f"Informe de Rendimentos - Bambuí - {nome} - {ano}"
     msg['To'] = destinatario
     msg.attach(MIMEText(corpo, 'html'))
@@ -39,7 +38,7 @@ def envia_email(destinatario, corpo, anexos_base64, nome, ano):
         attachment.close()
         fp.close()
 
-    email.sendmail(user, destinatario, msg.as_string())
+    email.sendmail(login_email, destinatario, msg.as_string())
     print("E-mail enviado para {}".format(nome))
     email.quit()
     time.sleep(1)
@@ -47,11 +46,11 @@ def envia_email(destinatario, corpo, anexos_base64, nome, ano):
 
 def get_autenticador():
 
-    headers = {"X-INTEGRATION-Authorization": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..XgYz2-rOf3uMaA2psyiP1Q.Ukj9jEbGVfuCJ7ZWnUa8mwB0h19K3F-cT74R-VrVmrDIW8eumGpw_yiameLpT_EeIHEm3x_7wyLXS1UqXN-652y4_ze72jBBs3KAvIeGbrV570C6O4pnN47gE2a9qBjfI8GTQMoIVXI94CumgzFiYi77D9o1vPthZYN5DgyFJm4.aiBau1sIGSLUhDUYc4BZ6g",
+    headers = {"X-INTEGRATION-Authorization": token_uau,
         "Content-Type": "application/json"}
     data = {
-        'login': 'root',
-        'senha': 'ti@2022'
+        'login': login_uau,
+        'senha': senha_uau
     }
 
     request = requests.post("http://45.191.207.245:8080/uauAPI/api/v1.0/Autenticador/AutenticarUsuario", headers=headers, data=str(data))
@@ -60,7 +59,7 @@ def get_autenticador():
 
 def envia_informe_rendimentos():
     headers = {
-            "X-INTEGRATION-Authorization": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..XgYz2-rOf3uMaA2psyiP1Q.Ukj9jEbGVfuCJ7ZWnUa8mwB0h19K3F-cT74R-VrVmrDIW8eumGpw_yiameLpT_EeIHEm3x_7wyLXS1UqXN-652y4_ze72jBBs3KAvIeGbrV570C6O4pnN47gE2a9qBjfI8GTQMoIVXI94CumgzFiYi77D9o1vPthZYN5DgyFJm4.aiBau1sIGSLUhDUYc4BZ6g",
+            "X-INTEGRATION-Authorization": token_uau,
             "Content-Type": "application/json",
             "Authorization": get_autenticador()
                    }
@@ -108,7 +107,7 @@ def envia_informe_rendimentos():
                     emails = pessoa['Email_pes'].split(';')
                     for email in emails:
                         clientes_df = clientes_df.append({'Nome': pessoa['nome_pes'], 'CPF': pessoa['cpf_pes'], 'E-mail': email}, ignore_index=True)
-                        with open('static/email rendimentos.html', encoding='utf-8') as html:
+                        with open('../static/email rendimentos.html', encoding='utf-8') as html:
                             envia_email(email, html.read(), rendimentos, pessoa['nome_pes'], ano_base)
             except:
                 clientes_df = clientes_df.append({'Nome': pessoa['nome_pes'], 'CPF': pessoa['cpf_pes'], 'E-mail': email,

@@ -1,13 +1,12 @@
 import time
 from servidor import app
 from flask import request, render_template
-import rendimentos
+from uau import rendimentos
 import receita_federal
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
 import smtplib
-
+from static.autenticacao import login_email, senha_email
 
 
 @app.route('/consulta_receitafederal', methods=['POST', 'GET'])
@@ -43,12 +42,13 @@ def informe_redimentos():
 def canvas():
     return render_template('canvas.html')
 
+
 @app.route('/email')
 def email():
     host = 'smtp.office365.com'
     port = 587
-    user = 'no-reply@bambui.com.br'
-    password = 'noreplay@2018'
+    user = login_email
+    password = senha_email
     email = smtplib.SMTP(host, port)
     email.starttls()
     email.login(user, password)
